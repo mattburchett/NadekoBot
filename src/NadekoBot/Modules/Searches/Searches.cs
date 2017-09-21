@@ -56,7 +56,7 @@ namespace NadekoBot.Modules.Searches
                 .AddField(fb => fb.WithName("😓 " + Format.Bold(GetText("humidity"))).WithValue($"{data.Main.Humidity}%").WithIsInline(true))
                 .AddField(fb => fb.WithName("💨 " + Format.Bold(GetText("wind_speed"))).WithValue(data.Wind.Speed + " m/s" + ", " + dataf.Wind.Speed + " mph").WithIsInline(true))
                 .AddField(fb => fb.WithName("🌡 " + Format.Bold(GetText("temperature"))).WithValue(data.Main.Temp + "°C" + ", " + dataf.Main.Temp + "°F").WithIsInline(true))
-                .AddField(fb => fb.WithName("🔆 " + Format.Bold(GetText("min_max"))).WithValue($"{data.Main.TempMin}°C - {data.Main.TempMax}°C + ", " + dataf.Main.Temp + "°F" ").WithIsInline(true))
+                .AddField(fb => fb.WithName("🔆 " + Format.Bold(GetText("min_max"))).WithValue($"{data.Main.TempMin}°C - {data.Main.TempMax}°C, {dataf.Main.TempMin}°F - {dataf.Main.TempMin}°F").WithIsInline(true))
                 .AddField(fb => fb.WithName("🌄 " + Format.Bold(GetText("sunrise"))).WithValue($"{data.Sys.Sunrise.ToUnixTimestamp():HH:mm} UTC").WithIsInline(true))
                 .AddField(fb => fb.WithName("🌇 " + Format.Bold(GetText("sunset"))).WithValue($"{data.Sys.Sunset.ToUnixTimestamp():HH:mm} UTC").WithIsInline(true))
                 .WithOkColor()
