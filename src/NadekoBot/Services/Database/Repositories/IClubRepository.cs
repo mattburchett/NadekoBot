@@ -10,7 +10,6 @@ namespace NadekoBot.Services.Database.Repositories
         int GetNextDiscrim(string clubName);
         ClubInfo GetByName(string v, int discrim, Func<DbSet<ClubInfo>, IQueryable<ClubInfo>> func = null);
         ClubInfo GetByOwner(ulong userId, Func<DbSet<ClubInfo>, IQueryable<ClubInfo>> func = null);
-        ClubInfo GetByOwnerOrAdmin(ulong userId);
         ClubInfo GetByMember(ulong userId, Func<DbSet<ClubInfo>, IQueryable<ClubInfo>> func = null);
         ClubInfo[] GetClubLeaderboardPage(int page);
     }

@@ -462,17 +462,13 @@ namespace NadekoBot.Migrations
 
                     b.Property<string>("Discriminator");
 
-                    b.Property<bool>("IsClubAdmin");
-
                     b.Property<DateTime>("LastLevelUp")
                         .ValueGeneratedOnAdd()
-                        .HasDefaultValue(new DateTime(2017, 9, 15, 5, 48, 8, 660, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2017, 9, 11, 22, 0, 31, 236, DateTimeKind.Local));
 
                     b.Property<DateTime>("LastXpGain");
 
                     b.Property<int>("NotifyOnLevelUp");
-
-                    b.Property<int>("TotalXp");
 
                     b.Property<ulong>("UserId");
 
@@ -1366,7 +1362,7 @@ namespace NadekoBot.Migrations
 
                     b.Property<DateTime>("LastLevelUp")
                         .ValueGeneratedOnAdd()
-                        .HasDefaultValue(new DateTime(2017, 9, 15, 5, 48, 8, 665, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2017, 9, 11, 22, 0, 31, 238, DateTimeKind.Local));
 
                     b.Property<int>("NotifyOnLevelUp");
 

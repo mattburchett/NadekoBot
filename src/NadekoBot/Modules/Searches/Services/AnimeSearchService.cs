@@ -11,14 +11,10 @@ namespace NadekoBot.Modules.Searches.Services
     public class AnimeSearchService : INService
     {
         private readonly Logger _log;
-        private readonly IDataCache _cache;
-        private readonly HttpClient _http;
 
-        public AnimeSearchService(IDataCache cache)
+        public AnimeSearchService()
         {
             _log = LogManager.GetCurrentClassLogger();
-            _cache = cache;
-            _http = new HttpClient();
         }
 
         public async Task<AnimeResult> GetAnimeData(string query)
@@ -29,16 +25,11 @@ namespace NadekoBot.Modules.Searches.Services
             {
 
                 var link = "https://aniapi.nadekobot.me/anime/" + Uri.EscapeDataString(query.Replace("/", " "));
-                link = link.ToLowerInvariant();
-                var (ok, data) = await _cache.TryGetAnimeDataAsync(link).ConfigureAwait(false);
-                if (!ok)
+                using (var http = new HttpClient())
                 {
-                    data = await _http.GetStringAsync(link).ConfigureAwait(false);
-                    await _cache.SetAnimeDataAsync(link, data).ConfigureAwait(false);
+                    var res = await http.GetStringAsync(link).ConfigureAwait(false);
+                    return JsonConvert.DeserializeObject<AnimeResult>(res);
                 }
-
-
-                return JsonConvert.DeserializeObject<AnimeResult>(data);
             }
             catch
             {
@@ -53,17 +44,12 @@ namespace NadekoBot.Modules.Searches.Services
             try
             {
 
-                 var link = "https://aniapi.nadekobot.me/manga/" + Uri.EscapeDataString(query.Replace("/", " "));
-                link = link.ToLowerInvariant();
-                var (ok, data) = await _cache.TryGetAnimeDataAsync(link).ConfigureAwait(false);
-                if (!ok)
+                var link = "https://aniapi.nadekobot.me/manga/" + Uri.EscapeDataString(query.Replace("/", " "));
+                using (var http = new HttpClient())
                 {
-                    data = await _http.GetStringAsync(link).ConfigureAwait(false);
-                    await _cache.SetAnimeDataAsync(link, data).ConfigureAwait(false);
+                    var res = await http.GetStringAsync(link).ConfigureAwait(false);
+                    return JsonConvert.DeserializeObject<MangaResult>(res);
                 }
-
-
-                return JsonConvert.DeserializeObject<MangaResult>(data);
             }
             catch
             {

@@ -27,11 +27,10 @@ namespace NadekoBot.Modules.Xp.Services
             {
                 var du = uow.DiscordUsers.GetOrCreate(user);
                 uow._context.SaveChanges();
-                var xp = new LevelStats(du.TotalXp);
+                var xp = new LevelStats(uow.Xp.GetTotalUserXp(user.Id));
 
                 if (xp.Level >= 5 && du.Club == null)
                 {
-                    du.IsClubAdmin = true;
                     du.Club = new ClubInfo()
                     {
                         Name = clubName,
@@ -51,27 +50,6 @@ namespace NadekoBot.Modules.Xp.Services
             }
 
             return true;
-        }
-
-        public bool ToggleAdmin(IUser owner, IUser toAdmin)
-        {
-            bool newState;
-            using (var uow = _db.UnitOfWork)
-            {
-                var club = uow.Clubs.GetByOwner(owner.Id);
-                var adminUser = uow.DiscordUsers.GetOrCreate(toAdmin);
-
-                if (club.OwnerId == adminUser.Id)
-                    return true;
-
-                if (club == null || club.Owner.UserId != owner.Id || 
-                    !club.Users.Contains(adminUser))
-                    throw new InvalidOperationException();
-
-                newState = adminUser.IsClubAdmin = !adminUser.IsClubAdmin;
-                uow.Complete();
-            }
-            return newState;
         }
 
         public ClubInfo GetClubByMember(IUser user)
@@ -129,7 +107,7 @@ namespace NadekoBot.Modules.Xp.Services
                 uow._context.SaveChanges();
 
                 if (du.Club != null
-                    || new LevelStats(du.TotalXp).Level < club.MinimumLevelReq
+                    || new LevelStats(uow.Xp.GetTotalUserXp(user.Id)).Level < club.MinimumLevelReq
                     || club.Bans.Any(x => x.UserId == du.Id)
                     || club.Applicants.Any(x => x.UserId == du.Id))
                 {
@@ -156,7 +134,11 @@ namespace NadekoBot.Modules.Xp.Services
             discordUser = null;
             using (var uow = _db.UnitOfWork)
             {
-                var club = uow.Clubs.GetByOwnerOrAdmin(clubOwnerUserId);
+                var club = uow.Clubs.GetByOwner(clubOwnerUserId,
+                    set => set.Include(x => x.Applicants)
+                        .ThenInclude(x => x.Club)
+                        .Include(x => x.Applicants)
+                        .ThenInclude(x => x.User));
                 if (club == null)
                     return false;
 
@@ -165,7 +147,6 @@ namespace NadekoBot.Modules.Xp.Services
                     return false;
 
                 applicant.User.Club = club;
-                applicant.User.IsClubAdmin = false;
                 club.Applicants.Remove(applicant);
 
                 //remove that user's all other applications
@@ -178,11 +159,15 @@ namespace NadekoBot.Modules.Xp.Services
             return true;
         }
 
-        public ClubInfo GetClubWithBansAndApplications(ulong ownerUserId)
+        public ClubInfo GetBansAndApplications(ulong ownerUserId)
         {
             using (var uow = _db.UnitOfWork)
             {
-                return uow.Clubs.GetByOwnerOrAdmin(ownerUserId);
+                return uow.Clubs.GetByOwner(ownerUserId,
+                    x => x.Include(y => y.Bans)
+                          .ThenInclude(y => y.User)
+                          .Include(y => y.Applicants)
+                          .ThenInclude(y => y.User));
             }
         }
 
@@ -195,7 +180,6 @@ namespace NadekoBot.Modules.Xp.Services
                     return false;
 
                 du.Club = null;
-                du.IsClubAdmin = false;
                 uow.Complete();
             }
             return true;
@@ -237,7 +221,9 @@ namespace NadekoBot.Modules.Xp.Services
         {
             using (var uow = _db.UnitOfWork)
             {
-                club = uow.Clubs.GetByOwnerOrAdmin(ownerUserId);
+                club = uow.Clubs.GetByOwner(ownerUserId,
+                    set => set.Include(x => x.Applicants)
+                        .ThenInclude(x => x.User));
                 if (club == null)
                     return false;
 
@@ -270,7 +256,9 @@ namespace NadekoBot.Modules.Xp.Services
         {
             using (var uow = _db.UnitOfWork)
             {
-                club = uow.Clubs.GetByOwnerOrAdmin(ownerUserId);
+                club = uow.Clubs.GetByOwner(ownerUserId,
+                    set => set.Include(x => x.Bans)
+                        .ThenInclude(x => x.User));
                 if (club == null)
                     return false;
 
@@ -289,7 +277,7 @@ namespace NadekoBot.Modules.Xp.Services
         {
             using (var uow = _db.UnitOfWork)
             {
-                club = uow.Clubs.GetByOwnerOrAdmin(ownerUserId);
+                club = uow.Clubs.GetByOwner(ownerUserId);
                 if (club == null)
                     return false;
 
